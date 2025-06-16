@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المصروفات المدرسية</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>نظام إدارة المصروفات المدرسية</span>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    لوحة التحكم
+                </button>
+                <button class="nav-item" onclick="showSection('students')">
+                    <i class="fas fa-users"></i>
+                    إدارة الطلاب
+                </button>
+                <button class="nav-item" onclick="showSection('fees')">
+                    <i class="fas fa-money-bill-wave"></i>
+                    الرسوم والأقساط
+                </button>
+                <button class="nav-item" onclick="showSection('bus')">
+                    <i class="fas fa-bus"></i>
+                    إدارة الباص
+                </button>
+                <button class="nav-item" onclick="showSection('reports')">
+                    <i class="fas fa-chart-bar"></i>
+                    التقارير
+                </button>
+                <button class="nav-item" onclick="showSection('settings')">
+                    <i class="fas fa-cog"></i>
+                    الإعدادات
+                </button>
+            </div>
+            <div class="nav-user">
+                <i class="fas fa-user-circle"></i>
+                <span id="current-user">مدير النظام</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- لوحة التحكم -->
+        <section id="dashboard" class="content-section active">
+            <div class="dashboard-header">
+                <h1><i class="fas fa-tachometer-alt"></i> لوحة التحكم</h1>
+                <div class="date-info">
+                    <span id="current-date"></span>
+                </div>
+            </div>
+            
+            <div class="dashboard-cards">
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="total-students">0</h3>
+                        <p>إجمالي الطلاب</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="total-fees">0.000 ر.ع</h3>
+                        <p>إجمالي الرسوم</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="paid-fees">0.000 ر.ع</h3>
+                        <p>المبالغ المسددة</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="pending-fees">0.000 ر.ع</h3>
+                        <p>المبالغ المتبقية</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="overdue-fees">0.000 ر.ع</h3>
+                        <p>المتأخرات (<span id="overdue-students">0</span> طالب)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- إدارة الطلاب -->
+        <section id="students" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i> إدارة الطلاب</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showAddStudentModal()">
+                        <i class="fas fa-plus"></i>
+                        إضافة طالب جديد
+                    </button>
+                    <button class="btn btn-success" onclick="downloadExcelTemplate()">
+                        <i class="fas fa-download"></i>
+                        تحميل نموذج Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="importStudentsFromExcel()">
+                        <i class="fas fa-file-import"></i>
+                        استيراد من Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportStudentsToExcel()">
+                        <i class="fas fa-file-export"></i>
+                        تصدير إلى Excel
+                    </button>
+                    <a href="excel-guide.html" class="btn btn-info" target="_blank">
+                        <i class="fas fa-question-circle"></i>
+                        دليل Excel
+                    </a>
+                </div>
+            </div>
+
+            <!-- أدوات البحث والتصفية -->
+            <div class="search-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="student-search" placeholder="البحث عن طالب..." onkeyup="searchStudents()">
+                </div>
+                <select id="grade-filter" onchange="filterStudents()">
+                    <option value="">جميع الصفوف</option>
+                    <option value="تمهيدي">تمهيدي</option>
+                    <option value="الأول">الأول</option>
+                    <option value="الثاني">الثاني</option>
+                    <option value="الثالث">الثالث</option>
+                    <option value="الرابع">الرابع</option>
+                    <option value="الخامس">الخامس</option>
+                    <option value="السادس">السادس</option>
+                    <option value="السابع">السابع</option>
+                    <option value="الثامن">الثامن</option>
+                    <option value="التاسع">التاسع</option>
+                    <option value="العاشر">العاشر</option>
+                    <option value="الحادي عشر">الحادي عشر</option>
+                    <option value="الثاني عشر">الثاني عشر</option>
+                </select>
+            </div>
+
+            <!-- جدول الطلاب -->
+            <div class="table-container">
+                <table id="students-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الطالب</th>
+                            <th>اسم الطالب</th>
+                            <th>الصف الدراسي</th>
+                            <th>رقم الهاتف</th>
+                            <th>نوع ولي الأمر</th>
+                            <th>إجمالي الرسوم</th>
+                            <th>المسدد</th>
+                            <th>المتبقي</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-tbody">
+                        <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- الرسوم والأقساط -->
+        <section id="fees" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-money-bill-wave"></i> الرسوم والأقساط</h1>
+            </div>
+            
+            <div class="fees-content">
+                <div class="fees-summary">
+                    <h3>ملخص الرسوم</h3>
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4>الرسوم الإجمالية</h4>
+                            <span id="fees-total">0.000 ر.ع</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>المبالغ المسددة</h4>
+                            <span id="fees-paid">0.000 ر.ع</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>المبالغ المعلقة</h4>
+                            <span id="fees-pending">0.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- إدارة الباص -->
+        <section id="bus" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-bus"></i> إدارة اشتراكات الباص</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="showBusSubscriptionModal()">
+                        <i class="fas fa-plus"></i>
+                        إضافة اشتراك جديد
+                    </button>
+                    <button class="btn btn-secondary" onclick="renewAllSubscriptions()">
+                        <i class="fas fa-redo"></i>
+                        تجديد جميع الاشتراكات
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bus-content">
+                <div class="bus-summary">
+                    <h3>ملخص اشتراكات الباص</h3>
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4>إجمالي المشتركين</h4>
+                            <span id="total-bus-subscribers">0</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>الاشتراكات النشطة</h4>
+                            <span id="active-bus-subscriptions">0</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>الاشتراكات المنتهية</h4>
+                            <span id="expired-bus-subscriptions">0</span>
+                        </div>
+                        <div class="summary-card">
+                            <h4>إجمالي الإيرادات</h4>
+                            <span id="total-bus-revenue">0.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- جدول اشتراكات الباص -->
+                <div class="table-container">
+                    <table id="bus-subscriptions-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>الصف</th>
+                                <th>رقم الهاتف</th>
+                                <th>تاريخ الاشتراك</th>
+                                <th>تاريخ الانتهاء</th>
+                                <th>المبلغ الشهري</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bus-subscriptions-tbody">
+                            <!-- سيتم ملء البيانات هنا بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- التقارير -->
+        <section id="reports" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-bar"></i> التقارير والإحصائيات</h1>
+            </div>
+            
+            <!-- عوامل التصفية -->
+            <div class="reports-filters">
+                <h3><i class="fas fa-filter"></i> عوامل التصفية</h3>
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="report-grade-filter">الصف الدراسي</label>
+                        <select id="report-grade-filter" class="form-control">
+                            <option value="">جميع الصفوف</option>
+                            <option value="تمهيدي">تمهيدي</option>
+                            <option value="الأول">الأول</option>
+                            <option value="الثاني">الثاني</option>
+                            <option value="الثالث">الثالث</option>
+                            <option value="الرابع">الرابع</option>
+                            <option value="الخامس">الخامس</option>
+                            <option value="السادس">السادس</option>
+                            <option value="السابع">السابع</option>
+                            <option value="الثامن">الثامن</option>
+                            <option value="التاسع">التاسع</option>
+                            <option value="العاشر">العاشر</option>
+                            <option value="الحادي عشر">الحادي عشر</option>
+                            <option value="الثاني عشر">الثاني عشر</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-guardian-filter">نوع ولي الأمر</label>
+                        <select id="report-guardian-filter" class="form-control">
+                            <option value="">جميع الأنواع</option>
+                            <option value="موظف">موظف</option>
+                            <option value="غير موظف">غير موظف</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-payment-status-filter">حالة السداد</label>
+                        <select id="report-payment-status-filter" class="form-control">
+                            <option value="">جميع الحالات</option>
+                            <option value="مسدد">مسدد بالكامل</option>
+                            <option value="جزئي">مسدد جزئياً</option>
+                            <option value="غير مسدد">غير مسدد</option>
+                            <option value="متأخر">متأخر في السداد</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-date-from">من تاريخ</label>
+                        <input type="date" id="report-date-from" class="form-control">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-date-to">إلى تاريخ</label>
+                        <input type="date" id="report-date-to" class="form-control">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-amount-from">المبلغ من (ر.ع)</label>
+                        <input type="number" id="report-amount-from" class="form-control" min="0" step="0.001" placeholder="0.000">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="report-amount-to">المبلغ إلى (ر.ع)</label>
+                        <input type="number" id="report-amount-to" class="form-control" min="0" step="0.001" placeholder="1000.000">
+                    </div>
+                </div>
+                
+                <div class="filters-actions">
+                    <button class="btn btn-primary" onclick="applyReportsFilters()">
+                        <i class="fas fa-filter"></i>
+                        تطبيق التصفية
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearReportsFilters()">
+                        <i class="fas fa-times"></i>
+                        مسح التصفية
+                    </button>
+                    <button class="btn btn-info" onclick="showFilteredStats()">
+                        <i class="fas fa-chart-pie"></i>
+                        عرض الإحصائيات
+                    </button>
+                </div>
+            </div>
+            
+            <!-- إحصائيات البيانات المفلترة -->
+            <div id="filtered-stats" class="filtered-stats" style="display: none;">
+                <h3><i class="fas fa-chart-line"></i> إحصائيات البيانات المفلترة</h3>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 id="filtered-students-count">0</h4>
+                            <p>عدد الطلاب</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="card-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 id="filtered-total-fees">0.000 ر.ع</h4>
+                            <p>إجمالي الرسوم</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 id="filtered-paid-fees">0.000 ر.ع</h4>
+                            <p>المبالغ المسددة</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 id="filtered-pending-fees">0.000 ر.ع</h4>
+                            <p>المبالغ المتبقية</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reports-grid">
+                <div class="report-card">
+                    <h3>تقرير الرسوم المدرسية</h3>
+                    <p>تقرير شامل بجميع رسوم الطلاب</p>
+                    <button class="btn btn-primary" onclick="generateFeesReport()">
+                        <i class="fas fa-file-pdf"></i>
+                        إنشاء التقرير
+                    </button>
+                </div>
+                
+                <div class="report-card">
+                    <h3>تقرير الأقساط المتأخرة</h3>
+                    <p>قائمة بالطلاب المتأخرين في السداد</p>
+                    <button class="btn btn-primary" onclick="generateOverdueReport()">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        إنشاء التقرير
+                    </button>
+                </div>
+                
+                <div class="report-card">
+                    <h3>تقرير الخصومات</h3>
+                    <p>تقرير بجميع الخصومات الممنوحة</p>
+                    <button class="btn btn-primary" onclick="generateDiscountsReport()">
+                        <i class="fas fa-percentage"></i>
+                        إنشاء التقرير
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- الإعدادات -->
+        <section id="settings" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-cog"></i> إعدادات النظام</h1>
+            </div>
+            
+            <div class="settings-content">
+                <div class="settings-card">
+                    <h3>بيانات المدرسة</h3>
+                    <form id="school-settings-form">
+                        <div class="form-group">
+                            <label>اسم المدرسة</label>
+                            <input type="text" id="school-name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" id="school-phone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>اسم المدير</label>
+                            <input type="text" id="school-director" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>شعار المدرسة</label>
+                            <input type="file" id="school-logo" class="form-control" accept="image/*" onchange="previewLogo()">
+                            <div id="logo-preview" class="mt-2"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            حفظ الإعدادات
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadSchoolSettings()">
+                            <i class="fas fa-sync"></i>
+                            تحديث البيانات
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- نافذة إضافة اشتراك باص -->
+    <div id="bus-subscription-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-bus"></i> إضافة اشتراك باص جديد</h2>
+                <span class="close" onclick="closeModal('bus-subscription-modal')">&times;</span>
+            </div>
+            <form id="bus-subscription-form" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اختر الطالب</label>
+                        <select id="bus-student-select" class="form-control" required>
+                            <option value="">اختر الطالب</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ الشهري (ريال عُماني)</label>
+                        <input type="number" id="bus-monthly-fee" class="form-control" min="0" step="0.001" value="20.000" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>تاريخ بداية الاشتراك</label>
+                        <input type="date" id="bus-start-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الأشهر</label>
+                        <input type="number" id="bus-months-count" class="form-control" min="1" max="12" value="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>طريقة الدفع</label>
+                        <select id="bus-payment-method" class="form-control" required>
+                            <option value="نقداً">نقداً</option>
+                            <option value="بنك">بنك</option>
+                            <option value="تحويل">تحويل</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات</label>
+                        <textarea id="bus-notes" class="form-control" rows="2" placeholder="ملاحظات إضافية"></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('bus-subscription-modal')">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        إضافة الاشتراك
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة طالب جديد -->
+    <div id="add-student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> إضافة طالب جديد</h2>
+                <span class="close" onclick="closeModal('add-student-modal')">&times;</span>
+            </div>
+            <form id="add-student-form" class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>العام الدراسي</label>
+                        <input type="text" id="academic-year" class="form-control" value="2024-2025" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم الطالب كاملاً</label>
+                        <input type="text" id="student-name" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الصف الدراسي</label>
+                        <select id="student-grade" class="form-control" required>
+                            <option value="">اختر الصف</option>
+                            <option value="تمهيدي">تمهيدي</option>
+                            <option value="الأول">الأول</option>
+                            <option value="الثاني">الثاني</option>
+                            <option value="الثالث">الثالث</option>
+                            <option value="الرابع">الرابع</option>
+                            <option value="الخامس">الخامس</option>
+                            <option value="السادس">السادس</option>
+                            <option value="السابع">السابع</option>
+                            <option value="الثامن">الثامن</option>
+                            <option value="التاسع">التاسع</option>
+                            <option value="العاشر">العاشر</option>
+                            <option value="الحادي عشر">الحادي عشر</option>
+                            <option value="الثاني عشر">الثاني عشر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف</label>
+                        <input type="tel" id="phone-number" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ولي الأمر</label>
+                        <select id="guardian-type" class="form-control" onchange="toggleEmployeeField()">
+                            <option value="غير موظف">غير موظف</option>
+                            <option value="موظف">موظف</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="employee-name-group" style="display: none;">
+                        <label>اسم الموظف</label>
+                        <input type="text" id="employee-name" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>إجمالي ديون الأعوام السابقة (ريال عُماني)</label>
+                        <input type="number" id="previous-debts" class="form-control" min="0" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>الرسوم الدراسية الحالية (ريال عُماني)</label>
+                        <input type="number" id="current-fees" class="form-control" min="0" step="0.001" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>المبلغ المقدم (ريال عُماني)</label>
+                        <input type="number" id="advance-payment" class="form-control" min="0" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>طريقة الدفع</label>
+                        <select id="payment-method" class="form-control">
+                            <option value="نقداً">نقداً</option>
+                            <option value="بنك">بنك</option>
+                            <option value="تحويل">تحويل</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>عدد الأقساط</label>
+                        <input type="number" id="installments-count" class="form-control" min="1" max="12" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ دفع أول قسط</label>
+                        <input type="date" id="first-installment-date" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>قيمة الخصم (ريال عُماني)</label>
+                        <input type="number" id="discount-amount" class="form-control" min="0" step="0.001">
+                    </div>
+                    <div class="form-group">
+                        <label>سبب الخصم</label>
+                        <select id="discount-reason" class="form-control">
+                            <option value="">لا يوجد خصم</option>
+                            <option value="ابن موظف">ابن موظف</option>
+                            <option value="ابن معلم">ابن معلم</option>
+                            <option value="مجتهد دراسياً">مجتهد دراسياً</option>
+                            <option value="منحة">منحة</option>
+                            <option value="مبلغ كاش">مبلغ كاش</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اشتراك الباص</label>
+                        <select id="bus-subscription" class="form-control">
+                            <option value="لا">لا</option>
+                            <option value="نعم">نعم</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <!-- حقل فارغ للتوازن -->
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-student-modal')">
+                        <i class="fas fa-times"></i>
+                        إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        إضافة الطالب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-screen" class="login-overlay">
+        <div class="login-container">
+            <div class="login-header">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>نظام إدارة المصروفات المدرسية</h1>
+                <p>تسجيل الدخول للموظفين</p>
+            </div>
+            
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" class="form-control" required placeholder="أدخل اسم المستخدم">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" class="form-control" required placeholder="أدخل كلمة المرور">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>نوع المستخدم</label>
+                    <select id="user-role" class="form-control" required>
+                        <option value="">اختر نوع المستخدم</option>
+                        <option value="admin">مدير النظام</option>
+                        <option value="accountant">محاسب</option>
+                        <option value="user">موظف عادي</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    تسجيل الدخول
+                </button>
+                
+                <div class="login-info">
+                    <h4>بيانات الدخول التجريبية:</h4>
+                    <div class="demo-accounts">
+                        <div class="demo-account">
+                            <strong>مدير النظام:</strong><br>
+                            المستخدم: admin | المرور: admin123
+                        </div>
+                        <div class="demo-account">
+                            <strong>محاسب:</strong><br>
+                            المستخدم: accountant | المرور: acc123
+                        </div>
+                        <div class="demo-account">
+                            <strong>موظف:</strong><br>
+                            المستخدم: user | المرور: user123
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal تعديل الطالب -->
+    <div id="edit-student-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>تعديل بيانات الطالب</h2>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-student-id">
+                
+                <div class="form-group">
+                    <label for="edit-student-name">اسم الطالب</label>
+                    <input type="text" id="edit-student-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-student-grade">الصف الدراسي</label>
+                    <select id="edit-student-grade" required>
+                        <option value="">اختر الصف</option>
+                        <option value="الأول">الأول</option>
+                        <option value="الثاني">الثاني</option>
+                        <option value="الثالث">الثالث</option>
+                        <option value="الرابع">الرابع</option>
+                        <option value="الخامس">الخامس</option>
+                        <option value="السادس">السادس</option>
+                        <option value="السابع">السابع</option>
+                        <option value="الثامن">الثامن</option>
+                        <option value="التاسع">التاسع</option>
+                        <option value="العاشر">العاشر</option>
+                        <option value="الحادي عشر">الحادي عشر</option>
+                        <option value="الثاني عشر">الثاني عشر</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-student-phone">رقم الهاتف</label>
+                    <input type="tel" id="edit-student-phone" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-guardian-type">نوع ولي الأمر</label>
+                    <select id="edit-guardian-type" required onchange="handleEditGuardianTypeChange()">
+                        <option value="">اختر نوع ولي الأمر</option>
+                        <option value="employee">ولي أمر موظف</option>
+                        <option value="non-employee">ولي أمر غير موظف</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="edit-employee-select-group" style="display: none;">
+                    <label for="edit-employee-select">اختر الموظف</label>
+                    <select id="edit-employee-select">
+                        <option value="">اختر الموظف</option>
+                    </select>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditStudentModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal إدارة الطالب -->
+    <div id="manage-student-modal" class="modal">
+        <div class="modal-content large-modal">
+            <span class="close">&times;</span>
+            <div class="modal-header">
+                <h2 id="manage-student-title">إدارة الطالب</h2>
+                <div class="student-info-summary">
+                    <div class="info-card">
+                        <i class="fas fa-user"></i>
+                        <span id="manage-student-name"></span>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span id="manage-student-grade"></span>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-money-bill"></i>
+                        <span id="manage-total-fees"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="manage-actions">
+                <div class="print-buttons">
+                    <button class="btn btn-secondary" onclick="printReceipt(getCurrentStudentId())" title="طباعة سند استلام">
+                        <i class="fas fa-receipt"></i> طباعة سند
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="generateDemandNotice(getCurrentStudentId())" title="إشعار مطالبة بالرسوم">
+                        <i class="fas fa-exclamation-triangle"></i> إشعار مطالبة
+                    </button>
+                </div>
+            </div>
+            
+            <div class="manage-tabs">
+                <button class="tab-btn active" onclick="showManageTab('payments', this)">الأقساط والمدفوعات</button>
+                <button class="tab-btn" onclick="showManageTab('history', this)">تاريخ الإجراءات</button>
+                <button class="tab-btn" onclick="showManageTab('summary', this)">ملخص الحساب</button>
+            </div>
+            
+            <!-- تبويب الأقساط والمدفوعات -->
+            <div id="payments-tab" class="tab-content active">
+                <div class="payments-section">
+                    <h3>الأقساط المستحقة</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>رقم القسط</th>
+                                    <th>تاريخ الاستحقاق</th>
+                                    <th>المبلغ</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="installments-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="payments-section">
+                    <h3>المدفوعات المسجلة</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>تاريخ الدفع</th>
+                                    <th>المبلغ</th>
+                                    <th>طريقة الدفع</th>
+                                    <th>رقم الإيصال</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب تاريخ الإجراءات -->
+            <div id="history-tab" class="tab-content">
+                <div class="history-section">
+                    <h3>سجل العمليات</h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>نوع الإجراء</th>
+                                    <th>التفاصيل</th>
+                                    <th>المستخدم</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب ملخص الحساب -->
+            <div id="summary-tab" class="tab-content">
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="card-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4>إجمالي الرسوم</h4>
+                            <span id="summary-total-fees" class="amount"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card paid">
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4>المبلغ المسدد</h4>
+                            <span id="summary-paid-amount" class="amount"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card pending">
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4>المبلغ المتبقي</h4>
+                            <span id="summary-remaining-amount" class="amount"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card overdue">
+                        <div class="card-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4>المتأخرات</h4>
+                            <span id="summary-overdue-amount" class="amount"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-section">
+                    <h3>تقدم السداد</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div id="payment-progress" class="progress-fill"></div>
+                        </div>
+                        <span id="payment-percentage" class="progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التنبيهات -->
+    <div id="alert-overlay" class="alert-overlay">
+        <div class="alert-box">
+            <div class="alert-icon">
+                <i id="alert-icon" class="fas fa-info-circle"></i>
+            </div>
+            <div class="alert-content">
+                <p id="alert-message"></p>
+            </div>
+            <div class="alert-actions">
+                <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

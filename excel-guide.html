@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل استخدام Excel - نظام إدارة المصروفات المدرسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+            color: #333;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4c51bf, #667eea);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            color: #4c51bf;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin: 2rem 0 1rem;
+            border-bottom: 2px solid #4c51bf;
+            padding-bottom: 0.5rem;
+        }
+
+        .steps {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #4c51bf;
+        }
+
+        .step-number {
+            background: #4c51bf;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            color: #4c51bf;
+            margin-bottom: 0.5rem;
+        }
+
+        .columns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .column-info {
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid #bee5eb;
+        }
+
+        .column-info h5 {
+            color: #0c5460;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .warning h4 {
+            color: #856404;
+            margin-bottom: 0.5rem;
+        }
+
+        .tip {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .tip h4 {
+            color: #0c5460;
+            margin-bottom: 0.5rem;
+        }
+
+        .example-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .example-table th,
+        .example-table td {
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .example-table th {
+            background: #4c51bf;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: #4c51bf;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 1rem 0;
+        }
+
+        .btn:hover {
+            background: #3c41b1;
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-file-excel"></i> دليل استخدام Excel</h1>
+            <p>تعلم كيفية استخدام ميزات Excel في نظام إدارة المصروفات المدرسية</p>
+        </div>
+
+        <div class="content">
+            <!-- قسم تحميل النموذج -->
+            <div class="section">
+                <h2><i class="fas fa-download"></i> تحميل نموذج Excel</h2>
+                <p>احصل على نموذج Excel جاهز للتعبئة مع جميع الحقول المطلوبة والتعليمات.</p>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>الدخول إلى قسم إدارة الطلاب</h4>
+                            <p>انتقل إلى النظام الرئيسي وسجل الدخول، ثم اضغط على "إدارة الطلاب"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>تحميل النموذج</h4>
+                            <p>اضغط على زر "تحميل نموذج Excel" الأخضر في أعلى الصفحة</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>حفظ الملف</h4>
+                            <p>سيتم تحميل ملف Excel جديد يحتوي على صفحتين: "بيانات الطلاب" و "التعليمات"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم أعمدة البيانات -->
+            <div class="section">
+                <h2><i class="fas fa-table"></i> أعمدة البيانات المطلوبة</h2>
+                
+                <div class="columns-grid">
+                    <div class="column-info">
+                        <h5>اسم الطالب</h5>
+                        <p>الاسم الكامل للطالب (مطلوب)</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>الصف الدراسي</h5>
+                        <p>من تمهيدي إلى الثاني عشر (مطلوب)</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>نوع ولي الأمر</h5>
+                        <p>موظف أو غير موظف</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>اسم الموظف</h5>
+                        <p>يُملأ إذا كان ولي الأمر موظف في المدرسة</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>رقم الهاتف</h5>
+                        <p>رقم هاتف ولي الأمر (مطلوب)</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>ديون الأعوام السابقة</h5>
+                        <p>بالريال العُماني (3 أرقام عشرية)</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>الرسوم الدراسية الحالية</h5>
+                        <p>رسوم السنة الحالية (مطلوب)</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>المبلغ المقدم</h5>
+                        <p>المبلغ المدفوع مسبقاً</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>طريقة الدفع</h5>
+                        <p>نقداً، بنك، تحويل</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>عدد الأقساط</h5>
+                        <p>عدد صحيح من 1 إلى 12</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>تاريخ أول قسط</h5>
+                        <p>بصيغة YYYY-MM-DD</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>قيمة الخصم</h5>
+                        <p>مبلغ الخصم الممنوح</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>سبب الخصم</h5>
+                        <p>ابن موظف، مجتهد، منحة، إلخ</p>
+                    </div>
+                    
+                    <div class="column-info">
+                        <h5>اشتراك الباص</h5>
+                        <p>نعم أو لا</p>
+                    </div>
+                </div>
+
+                <h3>مثال على البيانات:</h3>
+                <table class="example-table">
+                    <thead>
+                        <tr>
+                            <th>اسم الطالب</th>
+                            <th>الصف</th>
+                            <th>نوع ولي الأمر</th>
+                            <th>رقم الهاتف</th>
+                            <th>الرسوم</th>
+                            <th>المقدم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>أحمد محمد الكندي</td>
+                            <td>الثالث</td>
+                            <td>غير موظف</td>
+                            <td>+968 91234567</td>
+                            <td>400.000</td>
+                            <td>120.000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- قسم الاستيراد -->
+            <div class="section">
+                <h2><i class="fas fa-file-import"></i> استيراد البيانات من Excel</h2>
+                
+                <div class="warning">
+                    <h4><i class="fas fa-exclamation-triangle"></i> تنبيه مهم</h4>
+                    <ul>
+                        <li>احذف الصفوف المثالية قبل الاستيراد</li>
+                        <li>تأكد من صحة البيانات في كل عمود</li>
+                        <li>لا تغير ترتيب الأعمدة أو أسماءها</li>
+                        <li>استخدم الصفحة الأولى فقط للبيانات</li>
+                    </ul>
+                </div>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>تعبئة البيانات</h4>
+                            <p>املأ بيانات الطلاب في النموذج الذي حملته مسبقاً</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>حفظ الملف</h4>
+                            <p>احفظ الملف بصيغة Excel (.xlsx) بعد التأكد من صحة البيانات</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>استيراد الملف</h4>
+                            <p>اضغط "استيراد من Excel" واختر الملف المعبأ</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>مراجعة النتائج</h4>
+                            <p>ستظهر رسالة تؤكد عدد الطلاب المستوردين بنجاح والأخطاء إن وجدت</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم التصدير -->
+            <div class="section">
+                <h2><i class="fas fa-file-export"></i> تصدير البيانات إلى Excel</h2>
+                <p>احصل على ملف Excel شامل يحتوي على جميع بيانات الطلاب والإحصائيات.</p>
+                
+                <div class="tip">
+                    <h4><i class="fas fa-lightbulb"></i> ما يتم تصديره:</h4>
+                    <ul>
+                        <li><strong>صفحة "بيانات الطلاب":</strong> جميع البيانات الشخصية والمالية</li>
+                        <li><strong>صفحة "الإحصائيات":</strong> ملخص شامل للنظام</li>
+                        <li>البيانات منسقة ومرتبة لسهولة القراءة</li>
+                        <li>المبالغ مع 3 أرقام عشرية (ريال عُماني)</li>
+                    </ul>
+                </div>
+                
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>اضغط تصدير إلى Excel</h4>
+                            <p>من قسم إدارة الطلاب، اضغط الزر الرمادي "تصدير إلى Excel"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>حفظ الملف</h4>
+                            <p>سيتم تحميل ملف Excel تلقائياً باسم يحتوي على تاريخ اليوم</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>مراجعة البيانات</h4>
+                            <p>افتح الملف في Excel لمراجعة البيانات والإحصائيات</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- نصائح وحلول المشاكل -->
+            <div class="section">
+                <h2><i class="fas fa-tools"></i> نصائح وحل المشاكل</h2>
+                
+                <h3>نصائح للاستخدام الأمثل:</h3>
+                <div class="tip">
+                    <ul>
+                        <li>استخدم النموذج المحمل من النظام فقط</li>
+                        <li>لا تضع مسافات إضافية في بداية أو نهاية النصوص</li>
+                        <li>تأكد من صحة أرقام الهواتف (مع +968)</li>
+                        <li>استخدم التواريخ بصيغة YYYY-MM-DD</li>
+                        <li>اكتب المبالغ بـ 3 أرقام عشرية (مثال: 100.000)</li>
+                    </ul>
+                </div>
+                
+                <h3>حل المشاكل الشائعة:</h3>
+                <div class="warning">
+                    <h4>إذا فشل الاستيراد:</h4>
+                    <ul>
+                        <li>تحقق من أن الملف بصيغة .xlsx أو .xls</li>
+                        <li>تأكد من وجود البيانات الأساسية المطلوبة</li>
+                        <li>راجع صحة الصفوف الدراسية والقيم المدخلة</li>
+                        <li>تأكد من عدم وجود خلايا مدمجة أو تنسيق معقد</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="back-link">
+                <a href="index.html" class="btn">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة إلى النظام الرئيسي
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

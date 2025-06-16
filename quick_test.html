@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار سريع</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار سريع للأزرار</h1>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn btn-primary" onclick="showSection('students')">
+                <i class="fas fa-users"></i>
+                إدارة الطلاب
+            </button>
+            
+            <button class="btn btn-success" onclick="showAddStudentModal()">
+                <i class="fas fa-plus"></i>
+                إضافة طالب جديد
+            </button>
+            
+            <button class="btn btn-warning" onclick="editStudent(1)">
+                <i class="fas fa-edit"></i>
+                تعديل البيانات
+            </button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            جاري التحقق من الدوال...
+        </div>
+        
+        <!-- نافذة التنبيهات -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نافذة إضافة طالب -->
+        <div id="add-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إضافة طالب جديد</h2>
+                    <span class="close" onclick="closeModal('add-student-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>نافذة إضافة طالب تعمل!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نافذة تعديل طالب -->
+        <div id="edit-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>تعديل بيانات الطالب</h2>
+                    <span class="close" onclick="closeModal('edit-student-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>نافذة تعديل الطالب تعمل!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const result = document.getElementById('result');
+            let messages = [];
+            
+            // فحص الدوال
+            const functions = [
+                'showSection',
+                'showAddStudentModal', 
+                'editStudent',
+                'closeModal',
+                'showAlert',
+                'closeAlert'
+            ];
+            
+            functions.forEach(func => {
+                if (typeof window[func] === 'function') {
+                    messages.push(`✓ ${func} موجودة`);
+                } else {
+                    messages.push(`✗ ${func} غير موجودة`);
+                }
+            });
+            
+            result.innerHTML = messages.join('<br>');
+            
+            // اختبار بسيط
+            setTimeout(() => {
+                try {
+                    showAlert('اختبار التنبيه', 'success');
+                    setTimeout(() => closeAlert(), 2000);
+                } catch (error) {
+                    result.innerHTML += '<br><span style="color: red;">خطأ في showAlert: ' + error.message + '</span>';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

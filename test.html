@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار نظام إدارة المصروفات المدرسية</title>
+    <style>
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+            direction: rtl;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-button {
+            background: #4c51bf;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #3c41b1;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8f4f8;
+            border: 1px solid #bee5eb;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>اختبار نظام إدارة المصروفات المدرسية</h1>
+        <p>هذه الصفحة لاختبار وظائف النظام والتأكد من عمل جميع المكونات بشكل صحيح.</p>
+        
+        <h2>اختبارات قاعدة البيانات</h2>
+        <button class="test-button" onclick="testDatabaseInitialization()">اختبار تهيئة قاعدة البيانات</button>
+        <button class="test-button" onclick="testAddStudent()">اختبار إضافة طالب</button>
+        <button class="test-button" onclick="testAddPayment()">اختبار إضافة دفعة</button>
+        <button class="test-button" onclick="testBusSubscription()">اختبار اشتراك الباص</button>
+        <button class="test-button" onclick="testExcelFunctions()">اختبار وظائف Excel</button>
+        <button class="test-button" onclick="clearTestData()">مسح بيانات الاختبار</button>
+        
+        <h2>نتائج الاختبارات</h2>
+        <div id="test-results"></div>
+        
+        <h2>بيانات تجريبية</h2>
+        <button class="test-button" onclick="addSampleData()">إضافة بيانات تجريبية</button>
+        <button class="test-button" onclick="viewSampleData()">عرض البيانات التجريبية</button>
+        
+        <h2>الانتقال إلى النظام</h2>
+        <p>بعد انتهاء الاختبارات، يمكنك الانتقال إلى النظام الرئيسي:</p>
+        <a href="index.html" style="display: inline-block; background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 10px 0;">
+            فتح النظام الرئيسي
+        </a>
+    </div>
+
+    <script src="database.js"></script>
+    <script>
+        function logResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = `${new Date().toLocaleTimeString('ar-SA')}: ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function testDatabaseInitialization() {
+            try {
+                // اختبار تهيئة قاعدة البيانات
+                const testDb = new DatabaseManager();
+                const students = testDb.getStudents();
+                const settings = testDb.getSchoolSettings();
+                
+                logResult(`تم تهيئة قاعدة البيانات بنجاح. عدد الطلاب: ${students.length}`, 'success');
+                logResult(`إعدادات المدرسة: ${settings.name}`, 'success');
+            } catch (error) {
+                logResult(`خطأ في تهيئة قاعدة البيانات: ${error.message}`, 'error');
+            }
+        }
+
+        function testAddStudent() {
+            try {
+                const studentData = {
+                    academic_year: '2024-2025',
+                    name: 'أحمد محمد الكندي',
+                    grade: 'الثالث',
+                    guardian_name: 'أحمد محمد الكندي - ولي الأمر',
+                    guardian_type: 'غير موظف',
+                    phone: '+968 91234567',
+                    email: '',
+                    guardian_relation: 'ولي الأمر',
+                    previous_debts: 0,
+                    current_fees: 400.000,
+                    advance_payment: 120.000,
+                    payment_method: 'نقداً',
+                    installments_count: 3,
+                    first_installment_date: '2024-09-01',
+                    discount_amount: 40.000,
+                    discount_reason: 'ابن موظف',
+                    bus_subscription: 'نعم'
+                };
+
+                const result = db.addStudent(studentData);
+                
+                if (result.success) {
+                    logResult(`تم إضافة الطالب بنجاح. رقم الطالب: ${result.student.student_number}`, 'success');
+                } else {
+                    logResult(`فشل في إضافة الطالب: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                logResult(`خطأ في اختبار إضافة الطالب: ${error.message}`, 'error');
+            }
+        }
+
+        function testAddPayment() {
+            try {
+                const students = db.getStudents();
+                if (students.length === 0) {
+                    logResult('لا توجد طلاب لاختبار الدفعات. أضف طالب أولاً.', 'error');
+                    return;
+                }
+
+                const paymentData = {
+                    student_id: students[0].id,
+                    amount: 140.000,
+                    payment_method: 'نقداً',
+                    payment_type: 'قسط',
+                    notes: 'دفعة اختبار'
+                };
+
+                const result = db.addPayment(paymentData);
+                
+                if (result.success) {
+                    logResult(`تم إضافة الدفعة بنجاح. رقم السند: ${result.payment.receipt_number}`, 'success');
+                } else {
+                    logResult(`فشل في إضافة الدفعة: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                logResult(`خطأ في اختبار إضافة الدفعة: ${error.message}`, 'error');
+            }
+        }
+
+        function testBusSubscription() {
+            try {
+                const students = db.getStudents();
+                if (students.length === 0) {
+                    logResult('لا توجد طلاب لاختبار اشتراك الباص. أضف طالب أولاً.', 'error');
+                    return;
+                }
+
+                const subscriptionData = {
+                    student_id: students[0].id,
+                    monthly_fee: 20.000,
+                    start_date: '2024-09-01',
+                    months_count: 3,
+                    payment_method: 'نقداً',
+                    notes: 'اشتراك تجريبي'
+                };
+
+                const result = db.addBusSubscription(subscriptionData);
+                
+                if (result.success) {
+                    logResult(`تم إضافة اشتراك الباص بنجاح. ID: ${result.subscription.id}`, 'success');
+                } else {
+                    logResult(`فشل في إضافة اشتراك الباص: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                logResult(`خطأ في اختبار اشتراك الباص: ${error.message}`, 'error');
+            }
+        }
+
+        function clearTestData() {
+            if (confirm('هل أنت متأكد من مسح جميع البيانات؟')) {
+                try {
+                    const result = db.clearDatabase();
+                    if (result.success) {
+                        logResult('تم مسح جميع البيانات بنجاح', 'success');
+                    } else {
+                        logResult('فشل في مسح البيانات', 'error');
+                    }
+                } catch (error) {
+                    logResult(`خطأ في مسح البيانات: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function addSampleData() {
+            try {
+                const sampleStudents = [
+                    {
+                        academic_year: '2024-2025',
+                        name: 'فاطمة سالم البوسعيدية',
+                        grade: 'الرابع',
+                        guardian_name: 'فاطمة سالم البوسعيدية - ولي الأمر',
+                        guardian_type: 'موظف',
+                        employee_name: 'سالم البوسعيدي',
+                        phone: '+968 91111111',
+                        email: '',
+                        guardian_relation: 'ولي الأمر',
+                        previous_debts: 80.000,
+                        current_fees: 480.000,
+                        advance_payment: 200.000,
+                        payment_method: 'بنك',
+                        installments_count: 4,
+                        first_installment_date: '2024-09-15',
+                        discount_amount: 60.000,
+                        discount_reason: 'ابن موظف',
+                        bus_subscription: 'نعم'
+                    },
+                    {
+                        academic_year: '2024-2025',
+                        name: 'عبدالله أحمد الهنائي',
+                        grade: 'السادس',
+                        guardian_name: 'عبدالله أحمد الهنائي - ولي الأمر',
+                        guardian_type: 'غير موظف',
+                        phone: '+968 92222222',
+                        email: '',
+                        guardian_relation: 'ولي الأمر',
+                        previous_debts: 0,
+                        current_fees: 440.000,
+                        advance_payment: 80.000,
+                        payment_method: 'نقداً',
+                        installments_count: 3,
+                        first_installment_date: '2024-10-01',
+                        discount_amount: 0,
+                        discount_reason: '',
+                        bus_subscription: 'لا'
+                    },
+                    {
+                        academic_year: '2024-2025',
+                        name: 'مريم خالد الرواحية',
+                        grade: 'الثاني',
+                        guardian_name: 'مريم خالد الرواحية - ولي الأمر',
+                        guardian_type: 'غير موظف',
+                        phone: '+968 93333333',
+                        email: '',
+                        guardian_relation: 'ولي الأمر',
+                        previous_debts: 60.000,
+                        current_fees: 380.000,
+                        advance_payment: 120.000,
+                        payment_method: 'تحويل',
+                        installments_count: 2,
+                        first_installment_date: '2024-09-10',
+                        discount_amount: 20.000,
+                        discount_reason: 'مجتهد دراسياً',
+                        bus_subscription: 'نعم'
+                    }
+                ];
+
+                let addedCount = 0;
+                sampleStudents.forEach(studentData => {
+                    const result = db.addStudent(studentData);
+                    if (result.success) {
+                        addedCount++;
+                    }
+                });
+
+                logResult(`تم إضافة ${addedCount} طالب من البيانات التجريبية`, 'success');
+            } catch (error) {
+                logResult(`خطأ في إضافة البيانات التجريبية: ${error.message}`, 'error');
+            }
+        }
+
+        function viewSampleData() {
+            try {
+                const students = db.getStudents();
+                const fees = db.getFees();
+                const payments = db.getPayments();
+                const busSubscriptions = db.getBusSubscriptions();
+
+                logResult(`عدد الطلاب: ${students.length}`, 'info');
+                logResult(`عدد سجلات الرسوم: ${fees.length}`, 'info');
+                logResult(`عدد المدفوعات: ${payments.length}`, 'info');
+                logResult(`عدد اشتراكات الباص: ${busSubscriptions.length}`, 'info');
+
+                const stats = db.getDashboardStats();
+                logResult(`إجمالي الرسوم: ${stats.totalFees.toFixed(3)} ر.ع`, 'info');
+                logResult(`المبالغ المسددة: ${stats.totalPaid.toFixed(3)} ر.ع`, 'info');
+                logResult(`المبالغ المعلقة: ${stats.totalPending.toFixed(3)} ر.ع`, 'info');
+            } catch (error) {
+                logResult(`خطأ في عرض البيانات: ${error.message}`, 'error');
+            }
+        }
+
+        function testExcelFunctions() {
+            try {
+                // التحقق من توفر مكتبة xlsx
+                if (typeof XLSX === 'undefined') {
+                    logResult('مكتبة XLSX غير محملة. يرجى التأكد من تضمينها في الصفحة الرئيسية.', 'error');
+                    return;
+                }
+                
+                logResult('مكتبة XLSX متوفرة ومحملة بنجاح', 'success');
+                logResult('يمكنك الآن اختبار وظائف Excel من الصفحة الرئيسية', 'success');
+                logResult('الوظائف المتاحة: تحميل نموذج Excel، استيراد من Excel، تصدير إلى Excel', 'info');
+                
+            } catch (error) {
+                logResult(`خطأ في اختبار وظائف Excel: ${error.message}`, 'error');
+            }
+        }
+
+        // تشغيل اختبار أولي عند تحميل الصفحة
+        window.onload = function() {
+            logResult('مرحباً بك في صفحة اختبار النظام', 'success');
+            testDatabaseInitialization();
+        };
+    </script>
+</body>
+</html>
