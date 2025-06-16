@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار إصلاحات الدفع والحسابات</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار إصلاحات الدفع والحسابات</h1>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>1. إعداد البيانات التجريبية</h2>
+            <button class="btn btn-primary" onclick="setupTestStudent()">إنشاء طالب تجريبي</button>
+            <button class="btn btn-success" onclick="viewStudentData()">عرض بيانات الطالب</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>2. اختبار عمليات الدفع</h2>
+            <button class="btn btn-warning" onclick="testMainPayment()">اختبار الدفع الرئيسي</button>
+            <button class="btn btn-info" onclick="testManagementPayment()">اختبار دفع الإدارة</button>
+            <button class="btn btn-secondary" onclick="testOverpayment()">اختبار الدفع الزائد</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>3. اختبار ملخص الحساب</h2>
+            <button class="btn btn-success" onclick="openStudentManagement()">فتح إدارة الطالب</button>
+            <button class="btn btn-info" onclick="testSummaryCalculations()">اختبار حسابات الملخص</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>4. بيانات الطالب الحالية</h2>
+            <div id="student-info" style="background: #f8f9fa; padding: 15px; border-radius: 8px; font-family: monospace;">
+                لا توجد بيانات طالب...
+            </div>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>5. سجل الاختبارات</h2>
+            <div id="test-log" style="min-height: 300px; background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; overflow-y: auto;">
+                مرحباً بك في اختبار إصلاحات الدفع...
+            </div>
+        </div>
+        
+        <!-- النوافذ المنبثقة -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نافذة إدارة الطالب مبسطة للاختبار -->
+        <div id="manage-student-modal" class="modal">
+            <div class="modal-content large-modal">
+                <span class="close" onclick="closeModal('manage-student-modal')">&times;</span>
+                <div class="modal-header">
+                    <h2>إدارة الطالب</h2>
+                    <div class="student-info-summary">
+                        <div class="info-card">
+                            <i class="fas fa-user"></i>
+                            <span id="manage-student-name">طالب اختبار</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span id="manage-student-grade">الصف الثالث</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-money-bill"></i>
+                            <span id="manage-total-fees">500.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manage-tabs">
+                    <button class="tab-btn active" onclick="showManageTab('summary', this)">ملخص الحساب</button>
+                </div>
+                
+                <div id="summary-tab" class="tab-content active">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>إجمالي الرسوم</h4>
+                                <span id="summary-total-fees" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card paid">
+                            <div class="card-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المسدد</h4>
+                                <span id="summary-paid-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card pending">
+                            <div class="card-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المتبقي</h4>
+                                <span id="summary-remaining-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card overdue">
+                            <div class="card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المتأخرات</h4>
+                                <span id="summary-overdue-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <h3>تقدم السداد</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div id="payment-progress" class="progress-fill" style="width: 0%; background-color: #e53e3e;"></div>
+                            </div>
+                            <span id="payment-percentage" class="progress-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        let testStudentId = null;
+        
+        function setupTestStudent() {
+            // تسجيل دخول تلقائي
+            const adminUser = {
+                id: 1,
+                username: 'admin',
+                role: 'admin',
+                name: 'مدير النظام'
+            };
+            localStorage.setItem('logged_in_user', JSON.stringify(adminUser));
+            
+            // إنشاء طالب للاختبار
+            const studentData = {
+                academic_year: '2024-2025',
+                name: 'أحمد محمد اختبار الدفع',
+                grade: 'الصف الثالث',
+                guardian_type: 'غير موظف',
+                phone: '96891234567',
+                current_fees: 500,
+                installments_count: 2,
+                first_installment_date: '2024-01-01',
+                advance_payment: 0,
+                payment_method: 'نقداً'
+            };
+            
+            const result = db.addStudent(studentData);
+            
+            if (result.success) {
+                testStudentId = result.student.id;
+                logTest(`✓ تم إنشاء طالب اختبار: ${result.student.name} (ID: ${testStudentId})`);
+                viewStudentData();
+            } else {
+                logTest(`✗ فشل في إنشاء الطالب: ${result.error}`);
+            }
+        }
+        
+        function viewStudentData() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            const student = db.getStudent(testStudentId);
+            const fees = db.getStudentFees(testStudentId);
+            const payments = db.getStudentPayments(testStudentId);
+            const stats = calculateStudentStats(student, fees, payments);
+            
+            const studentInfo = `
+اسم الطالب: ${student.name}
+الصف: ${student.grade}
+=======================
+إجمالي الرسوم: ${formatCurrency(stats.totalFees)}
+المبلغ المسدد: ${formatCurrency(stats.totalPaid)}
+المبلغ المتبقي: ${formatCurrency(stats.remainingAmount)}
+المتأخرات: ${formatCurrency(stats.overdueAmount)}
+نسبة التقدم: ${stats.progressPercentage}%
+=======================
+عدد المدفوعات: ${payments.length}
+            `;
+            
+            document.getElementById('student-info').textContent = studentInfo;
+            logTest(`تم عرض بيانات الطالب (المتبقي: ${formatCurrency(stats.remainingAmount)})`);
+        }
+        
+        function testMainPayment() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            logTest('اختبار وظيفة الدفع الرئيسية...');
+            
+            try {
+                makePayment(testStudentId);
+                logTest('✓ تم فتح نافذة الدفع بنجاح');
+            } catch (error) {
+                logTest(`✗ خطأ في الدفع الرئيسي: ${error.message}`);
+            }
+        }
+        
+        function testManagementPayment() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            logTest('اختبار دفع الإدارة...');
+            
+            // محاكاة النقر على prompt بمبلغ معقول
+            const originalPrompt = window.prompt;
+            window.prompt = function(message) {
+                logTest(`تم عرض نافذة الدفع: ${message.substring(0, 100)}...`);
+                return '100'; // مبلغ اختبار
+            };
+            
+            try {
+                payInstallment(testStudentId, 1);
+                logTest('✓ تم معالجة دفع الإدارة');
+                
+                // تحديث البيانات
+                setTimeout(() => {
+                    viewStudentData();
+                }, 500);
+                
+            } catch (error) {
+                logTest(`✗ خطأ في دفع الإدارة: ${error.message}`);
+            } finally {
+                window.prompt = originalPrompt;
+            }
+        }
+        
+        function testOverpayment() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            logTest('اختبار منع الدفع الزائد...');
+            
+            const student = db.getStudent(testStudentId);
+            const fees = db.getStudentFees(testStudentId);
+            const payments = db.getStudentPayments(testStudentId);
+            const stats = calculateStudentStats(student, fees, payments);
+            
+            // محاولة دفع مبلغ أكبر من المتبقي
+            const excessiveAmount = stats.remainingAmount + 100;
+            
+            const originalPrompt = window.prompt;
+            window.prompt = function(message) {
+                logTest(`محاولة دفع مبلغ زائد: ${formatCurrency(excessiveAmount)}`);
+                return excessiveAmount.toString();
+            };
+            
+            try {
+                payInstallment(testStudentId, 1);
+                logTest('✓ تم منع الدفع الزائد بنجاح');
+            } catch (error) {
+                logTest(`✗ خطأ في اختبار الدفع الزائد: ${error.message}`);
+            } finally {
+                window.prompt = originalPrompt;
+            }
+        }
+        
+        function openStudentManagement() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            try {
+                const student = db.getStudent(testStudentId);
+                const fees = db.getStudentFees(testStudentId);
+                const payments = db.getStudentPayments(testStudentId);
+                const stats = calculateStudentStats(student, fees, payments);
+                
+                // تحديث النافذة
+                document.getElementById('manage-student-name').textContent = student.name;
+                document.getElementById('manage-student-grade').textContent = student.grade;
+                document.getElementById('manage-total-fees').textContent = formatCurrency(stats.remainingAmount);
+                
+                // تحديث الملخص
+                updateStudentSummary(student, fees, payments);
+                
+                // فتح النافذة
+                document.getElementById('manage-student-modal').style.display = 'block';
+                
+                logTest('✓ تم فتح نافذة إدارة الطالب مع الملخص المحدث');
+                
+            } catch (error) {
+                logTest(`✗ خطأ في فتح إدارة الطالب: ${error.message}`);
+            }
+        }
+        
+        function testSummaryCalculations() {
+            if (!testStudentId) {
+                logTest('✗ لا يوجد طالب اختبار. قم بإنشاء طالب أولاً');
+                return;
+            }
+            
+            const student = db.getStudent(testStudentId);
+            const fees = db.getStudentFees(testStudentId);
+            const payments = db.getStudentPayments(testStudentId);
+            const stats = calculateStudentStats(student, fees, payments);
+            
+            // فحص العناصر في الملخص
+            const totalElement = document.getElementById('summary-total-fees');
+            const paidElement = document.getElementById('summary-paid-amount');
+            const remainingElement = document.getElementById('summary-remaining-amount');
+            const overdueElement = document.getElementById('summary-overdue-amount');
+            const progressElement = document.getElementById('payment-percentage');
+            
+            logTest('فحص ملخص الحساب:');
+            
+            if (totalElement && totalElement.textContent.includes(formatCurrency(stats.totalFees).slice(0, 3))) {
+                logTest('✓ إجمالي الرسوم صحيح');
+            } else {
+                logTest('✗ إجمالي الرسوم غير صحيح');
+            }
+            
+            if (paidElement && paidElement.textContent.includes(formatCurrency(stats.totalPaid).slice(0, 3))) {
+                logTest('✓ المبلغ المسدد صحيح');
+            } else {
+                logTest('✗ المبلغ المسدد غير صحيح');
+            }
+            
+            if (remainingElement && remainingElement.textContent.includes(formatCurrency(stats.remainingAmount).slice(0, 3))) {
+                logTest('✓ المبلغ المتبقي صحيح');
+            } else {
+                logTest('✗ المبلغ المتبقي غير صحيح');
+            }
+            
+            if (progressElement && progressElement.textContent.includes(stats.progressPercentage + '%')) {
+                logTest('✓ نسبة التقدم صحيحة');
+            } else {
+                logTest('✗ نسبة التقدم غير صحيحة');
+            }
+        }
+        
+        function logTest(message) {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // اختبار تلقائي عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            logTest('🚀 مرحباً بك في اختبار إصلاحات الدفع والحسابات');
+            logTest('📝 ابدأ بإنشاء طالب تجريبي ثم اختبر الوظائف');
+            logTest('==========================================');
+        });
+    </script>
+</body>
+</html>

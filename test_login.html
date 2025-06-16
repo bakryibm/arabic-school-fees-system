@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار تسجيل الدخول</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار تسجيل الدخول والأزرار</h1>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn btn-secondary" onclick="testLogin()">تسجيل دخول تلقائي</button>
+            <button class="btn btn-danger" onclick="testLogout()">تسجيل خروج</button>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn btn-primary" onclick="testStudentSection()">
+                <i class="fas fa-users"></i>
+                اختبار إدارة الطلاب
+            </button>
+            
+            <button class="btn btn-success" onclick="testAddModal()">
+                <i class="fas fa-plus"></i>
+                اختبار إضافة طالب
+            </button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            جاري التحقق...
+        </div>
+        
+        <!-- نافذة التنبيهات -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نافذة إضافة طالب -->
+        <div id="add-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إضافة طالب جديد</h2>
+                    <span class="close" onclick="closeModal('add-student-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>نافذة إضافة طالب تعمل!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        function testLogin() {
+            // محاكاة تسجيل الدخول
+            const adminUser = {
+                id: 1,
+                username: 'admin',
+                role: 'admin',
+                name: 'مدير النظام'
+            };
+            
+            localStorage.setItem('logged_in_user', JSON.stringify(adminUser));
+            document.getElementById('result').innerHTML = 'تم تسجيل الدخول كمدير النظام';
+            
+            // إعادة تحميل التطبيق
+            if (typeof initializeApp === 'function') {
+                initializeApp();
+            }
+        }
+        
+        function testLogout() {
+            localStorage.removeItem('logged_in_user');
+            document.getElementById('result').innerHTML = 'تم تسجيل الخروج';
+        }
+        
+        function testStudentSection() {
+            try {
+                showSection('students');
+                document.getElementById('result').innerHTML += '<br>تم استدعاء showSection بنجاح';
+            } catch (error) {
+                document.getElementById('result').innerHTML += '<br>خطأ: ' + error.message;
+            }
+        }
+        
+        function testAddModal() {
+            try {
+                showAddStudentModal();
+                document.getElementById('result').innerHTML += '<br>تم فتح نافذة إضافة طالب';
+            } catch (error) {
+                document.getElementById('result').innerHTML += '<br>خطأ في النافذة: ' + error.message;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const result = document.getElementById('result');
+            
+            // فحص حالة تسجيل الدخول
+            const loggedInUser = localStorage.getItem('logged_in_user');
+            if (loggedInUser) {
+                result.innerHTML = 'المستخدم مسجل دخوله: ' + JSON.parse(loggedInUser).name;
+            } else {
+                result.innerHTML = 'لم يتم تسجيل الدخول - قد تكون هذه هي المشكلة!';
+            }
+        });
+    </script>
+</body>
+</html>

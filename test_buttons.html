@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الأزرار</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            direction: rtl;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>اختبار وظائف الأزرار</h1>
+    
+    <div class="test-section">
+        <h2>اختبار زر إدارة الطلاب</h2>
+        <button onclick="testStudentManagement()">اختبار إدارة الطلاب</button>
+        <div id="student-test-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>اختبار زر تعديل البيانات</h2>
+        <button onclick="testEditButton()">اختبار تعديل البيانات</button>
+        <div id="edit-test-result" class="result"></div>
+    </div>
+
+    <script>
+        function testStudentManagement() {
+            const result = document.getElementById('student-test-result');
+            try {
+                // محاكاة النقر على زر إدارة الطلاب
+                if (typeof showSection === 'function') {
+                    showSection('students');
+                    result.innerHTML = '<span style="color: green;">✓ دالة showSection موجودة وتعمل</span>';
+                } else {
+                    result.innerHTML = '<span style="color: red;">✗ دالة showSection غير موجودة</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span style="color: red;">✗ خطأ: ' + error.message + '</span>';
+            }
+        }
+
+        function testEditButton() {
+            const result = document.getElementById('edit-test-result');
+            try {
+                // محاكاة النقر على زر تعديل البيانات
+                if (typeof showAddStudentModal === 'function') {
+                    result.innerHTML = '<span style="color: green;">✓ دالة showAddStudentModal موجودة</span>';
+                    
+                    if (typeof editStudent === 'function') {
+                        result.innerHTML += '<br><span style="color: green;">✓ دالة editStudent موجودة</span>';
+                    } else {
+                        result.innerHTML += '<br><span style="color: red;">✗ دالة editStudent غير موجودة</span>';
+                    }
+                } else {
+                    result.innerHTML = '<span style="color: red;">✗ دالة showAddStudentModal غير موجودة</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span style="color: red;">✗ خطأ: ' + error.message + '</span>';
+            }
+        }
+
+        // تحميل الملفات الأساسية للاختبار
+        function loadScripts() {
+            const scripts = ['database.js', 'app.js'];
+            let loadedCount = 0;
+            
+            scripts.forEach(scriptSrc => {
+                const script = document.createElement('script');
+                script.src = scriptSrc;
+                script.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === scripts.length) {
+                        document.getElementById('student-test-result').innerHTML = 'تم تحميل الملفات بنجاح. جاهز للاختبار.';
+                    }
+                };
+                script.onerror = () => {
+                    document.getElementById('student-test-result').innerHTML = 'خطأ في تحميل ' + scriptSrc;
+                };
+                document.head.appendChild(script);
+            });
+        }
+
+        // تحميل الملفات عند تحميل الصفحة
+        window.onload = loadScripts;
+    </script>
+</body>
+</html>

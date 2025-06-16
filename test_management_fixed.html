@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار إصلاحات شاشة إدارة الطالب</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار إصلاحات شاشة إدارة الطالب</h1>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>1. إعداد البيانات التجريبية</h2>
+            <button class="btn btn-primary" onclick="setupTestData()">إعداد بيانات تجريبية</button>
+            <button class="btn btn-success" onclick="openManagementScreen()">فتح شاشة إدارة الطالب</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>2. اختبار الدفع والتحديث</h2>
+            <button class="btn btn-warning" onclick="simulatePayment()">محاكاة دفع قسط</button>
+            <button class="btn btn-info" onclick="checkButtonChange()">فحص تغيير الأزرار</button>
+            <button class="btn btn-secondary" onclick="checkSummaryUpdate()">فحص تحديث الملخص</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>3. اختبار سجل الإجراءات</h2>
+            <button class="btn btn-success" onclick="addTestAction()">إضافة إجراء تجريبي</button>
+            <button class="btn btn-info" onclick="viewActionHistory()">عرض سجل الإجراءات</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>4. نتائج الاختبار</h2>
+            <div id="test-results" style="min-height: 300px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                انقر على "إعداد بيانات تجريبية" لبدء الاختبار...
+            </div>
+        </div>
+        
+        <!-- النوافذ المنبثقة -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="manage-student-modal" class="modal">
+            <div class="modal-content large-modal">
+                <span class="close" onclick="closeModal('manage-student-modal')">&times;</span>
+                <div class="modal-header">
+                    <h2>إدارة الطالب</h2>
+                    <div class="student-info-summary">
+                        <div class="info-card">
+                            <i class="fas fa-user"></i>
+                            <span id="manage-student-name">أحمد محمد</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span id="manage-student-grade">الصف الخامس</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-money-bill"></i>
+                            <span id="manage-total-fees">500.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manage-tabs">
+                    <button class="tab-btn active" onclick="showManageTab('payments', this)">الأقساط والمدفوعات</button>
+                    <button class="tab-btn" onclick="showManageTab('history', this)">تاريخ الإجراءات</button>
+                    <button class="tab-btn" onclick="showManageTab('summary', this)">ملخص الحساب</button>
+                </div>
+                
+                <div id="payments-tab" class="tab-content active">
+                    <div class="payments-section">
+                        <h3>الأقساط المستحقة</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم القسط</th>
+                                        <th>تاريخ الاستحقاق</th>
+                                        <th>المبلغ</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="installments-tbody">
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="history-tab" class="tab-content">
+                    <div class="history-section">
+                        <h3>سجل العمليات</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>نوع الإجراء</th>
+                                        <th>التفاصيل</th>
+                                        <th>المستخدم</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-tbody">
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="summary-tab" class="tab-content">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>إجمالي الرسوم</h4>
+                                <span id="summary-total-fees" class="amount">500.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card paid">
+                            <div class="card-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المسدد</h4>
+                                <span id="summary-paid-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card pending">
+                            <div class="card-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المتبقي</h4>
+                                <span id="summary-remaining-amount" class="amount">500.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card overdue">
+                            <div class="card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المتأخرات</h4>
+                                <span id="summary-overdue-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <h3>تقدم السداد</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div id="payment-progress" class="progress-fill" style="width: 0%; background-color: #e53e3e;"></div>
+                            </div>
+                            <span id="payment-percentage" class="progress-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        let testResults = [];
+        let testStudentId = null;
+        
+        function setupTestData() {
+            // تسجيل دخول تلقائي
+            const adminUser = {
+                id: 1,
+                username: 'admin',
+                role: 'admin',
+                name: 'مدير النظام'
+            };
+            localStorage.setItem('logged_in_user', JSON.stringify(adminUser));
+            
+            // إنشاء طالب تجريبي
+            const studentData = {
+                academic_year: '2024-2025',
+                name: 'أحمد محمد علي',
+                grade: 'الصف الخامس',
+                guardian_type: 'غير موظف',
+                phone: '96891234567',
+                current_fees: 500,
+                installments_count: 2,
+                first_installment_date: '2024-01-01',
+                advance_payment: 0,
+                payment_method: 'نقداً'
+            };
+            
+            const result = db.addStudent(studentData);
+            if (result.success) {
+                testStudentId = result.student.id;
+                addTestResult('✓ تم إنشاء طالب تجريبي بنجاح (ID: ' + testStudentId + ')', 'success');
+                addTestResult('✓ تم تسجيل الدخول كمدير النظام', 'success');
+            } else {
+                addTestResult('✗ فشل في إنشاء الطالب التجريبي', 'error');
+            }
+        }
+        
+        function openManagementScreen() {
+            if (!testStudentId) {
+                addTestResult('✗ يجب إعداد البيانات التجريبية أولاً', 'error');
+                return;
+            }
+            
+            try {
+                // فتح شاشة إدارة الطالب
+                manageStudent(testStudentId);
+                addTestResult('✓ تم فتح شاشة إدارة الطالب', 'success');
+                
+                // فحص تحديث المعلومات في الرأس
+                setTimeout(() => {
+                    const feesElement = document.getElementById('manage-total-fees');
+                    if (feesElement && feesElement.textContent.includes('500')) {
+                        addTestResult('✓ المبلغ في رأس الشاشة يظهر بشكل صحيح', 'success');
+                    } else {
+                        addTestResult('✗ المبلغ في رأس الشاشة غير صحيح', 'error');
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                addTestResult('✗ خطأ في فتح شاشة الإدارة: ' + error.message, 'error');
+            }
+        }
+        
+        function simulatePayment() {
+            if (!testStudentId) {
+                addTestResult('✗ يجب إعداد البيانات التجريبية أولاً', 'error');
+                return;
+            }
+            
+            try {
+                // محاكاة دفع قسط
+                const paymentData = {
+                    student_id: testStudentId,
+                    amount: 250,
+                    payment_method: 'نقداً',
+                    payment_date: new Date().toISOString().split('T')[0],
+                    receipt_number: generateReceiptNumber(),
+                    notes: 'دفع القسط رقم 1 - اختبار'
+                };
+                
+                const result = db.addPayment(paymentData);
+                
+                if (result.success) {
+                    addTestResult('✓ تم تسجيل الدفعة بنجاح', 'success');
+                    
+                    // تحديث البيانات
+                    if (typeof updateStudentHeaderInfo === 'function') {
+                        updateStudentHeaderInfo(testStudentId);
+                        addTestResult('✓ تم تحديث معلومات الرأس', 'success');
+                    }
+                    
+                    if (typeof loadStudentManagementData === 'function') {
+                        loadStudentManagementData(testStudentId);
+                        addTestResult('✓ تم تحديث بيانات الإدارة', 'success');
+                    }
+                    
+                    // فحص تحديث المبلغ المتبقي
+                    setTimeout(() => {
+                        const feesElement = document.getElementById('manage-total-fees');
+                        if (feesElement && feesElement.textContent.includes('250')) {
+                            addTestResult('✓ المبلغ المتبقي تم تحديثه بشكل صحيح', 'success');
+                        } else {
+                            addTestResult('⚠ المبلغ المتبقي قد لا يكون محدثاً بشكل صحيح', 'warning');
+                        }
+                    }, 500);
+                    
+                } else {
+                    addTestResult('✗ فشل في تسجيل الدفعة: ' + result.error, 'error');
+                }
+                
+            } catch (error) {
+                addTestResult('✗ خطأ في محاكاة الدفع: ' + error.message, 'error');
+            }
+        }
+        
+        function checkButtonChange() {
+            // فحص تغيير أزرار الدفع/الطباعة
+            const installmentsTable = document.getElementById('installments-tbody');
+            if (installmentsTable) {
+                const buttons = installmentsTable.querySelectorAll('button');
+                let paidButtons = 0;
+                let payButtons = 0;
+                
+                buttons.forEach(button => {
+                    if (button.textContent.includes('طباعة')) paidButtons++;
+                    if (button.textContent.includes('دفع')) payButtons++;
+                });
+                
+                addTestResult(`✓ الأزرار: ${paidButtons} طباعة، ${payButtons} دفع`, 'info');
+                
+                if (paidButtons > 0) {
+                    addTestResult('✓ يوجد أزرار طباعة (الأقساط المدفوعة)', 'success');
+                }
+                if (payButtons > 0) {
+                    addTestResult('✓ يوجد أزرار دفع (الأقساط غير المدفوعة)', 'success');
+                }
+            } else {
+                addTestResult('✗ لم يتم العثور على جدول الأقساط', 'error');
+            }
+        }
+        
+        function checkSummaryUpdate() {
+            // فحص تحديث ملخص الحساب
+            showManageTab('summary');
+            
+            setTimeout(() => {
+                const totalElement = document.getElementById('summary-total-fees');
+                const paidElement = document.getElementById('summary-paid-amount');
+                const remainingElement = document.getElementById('summary-remaining-amount');
+                const progressBar = document.getElementById('payment-progress');
+                const progressText = document.getElementById('payment-percentage');
+                
+                if (totalElement && totalElement.textContent.includes('500')) {
+                    addTestResult('✓ إجمالي الرسوم في الملخص صحيح', 'success');
+                } else {
+                    addTestResult('✗ إجمالي الرسوم في الملخص غير صحيح', 'error');
+                }
+                
+                if (paidElement && parseFloat(paidElement.textContent.replace(/[^0-9.]/g, '')) > 0) {
+                    addTestResult('✓ المبلغ المسدد في الملخص محدث', 'success');
+                } else {
+                    addTestResult('⚠ المبلغ المسدد قد يحتاج تحديث', 'warning');
+                }
+                
+                if (progressBar && parseInt(progressBar.style.width) > 0) {
+                    addTestResult('✓ شريط التقدم يعمل (' + progressBar.style.width + ')', 'success');
+                } else {
+                    addTestResult('⚠ شريط التقدم قد يحتاج تحديث', 'warning');
+                }
+            }, 500);
+        }
+        
+        function addTestAction() {
+            if (!testStudentId) {
+                addTestResult('✗ يجب إعداد البيانات التجريبية أولاً', 'error');
+                return;
+            }
+            
+            try {
+                logStudentAction(testStudentId, 'اختبار النظام', 'إجراء تجريبي لاختبار تسجيل العمليات');
+                addTestResult('✓ تم تسجيل إجراء تجريبي', 'success');
+            } catch (error) {
+                addTestResult('✗ خطأ في تسجيل الإجراء: ' + error.message, 'error');
+            }
+        }
+        
+        function viewActionHistory() {
+            if (!testStudentId) {
+                addTestResult('✗ يجب إعداد البيانات التجريبية أولاً', 'error');
+                return;
+            }
+            
+            try {
+                showManageTab('history');
+                loadStudentActionHistory(testStudentId);
+                
+                setTimeout(() => {
+                    const historyTable = document.getElementById('history-tbody');
+                    if (historyTable) {
+                        const rows = historyTable.querySelectorAll('tr');
+                        if (rows.length > 0) {
+                            addTestResult(`✓ سجل الإجراءات يعمل (${rows.length} إجراء)`, 'success');
+                        } else {
+                            addTestResult('⚠ لا توجد إجراءات مسجلة', 'warning');
+                        }
+                    } else {
+                        addTestResult('✗ لم يتم العثور على جدول الإجراءات', 'error');
+                    }
+                }, 500);
+                
+            } catch (error) {
+                addTestResult('✗ خطأ في عرض سجل الإجراءات: ' + error.message, 'error');
+            }
+        }
+        
+        function addTestResult(message, type) {
+            const colors = {
+                success: 'green',
+                error: 'red',
+                warning: 'orange',
+                info: 'blue'
+            };
+            
+            const icon = {
+                success: '✓',
+                error: '✗',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+            
+            const color = colors[type] || 'black';
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            
+            testResults.push(`<div style="color: ${color}; margin: 5px 0; padding: 5px; border-left: 3px solid ${color}; background: rgba(${type === 'success' ? '0,255,0' : type === 'error' ? '255,0,0' : type === 'warning' ? '255,165,0' : '0,0,255'}, 0.1);">[${timestamp}] ${icon[type] || ''} ${message}</div>`);
+            document.getElementById('test-results').innerHTML = testResults.join('');
+            
+            // التمرير لأسفل
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        // اختبار تلقائي عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('🚀 مرحباً بك في اختبار إصلاحات شاشة إدارة الطالب', 'info');
+            addTestResult('📝 ابدأ بالنقر على "إعداد بيانات تجريبية"', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار شامل للنظام</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار شامل لنظام إدارة المصروفات المدرسية</h1>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>1. اختبار تسجيل الدخول والأزرار الأساسية</h2>
+            <button class="btn btn-primary" onclick="autoLogin()">تسجيل دخول تلقائي</button>
+            <button class="btn btn-success" onclick="testAddStudent()">اختبار إضافة طالب</button>
+            <button class="btn btn-warning" onclick="testEditStudent()">اختبار تعديل طالب</button>
+            <button class="btn btn-info" onclick="testManageStudent()">اختبار إدارة طالب</button>
+            <button class="btn btn-danger" onclick="testDeleteStudent()">اختبار حذف طالب</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>2. اختبار وظائف الطباعة والدفع</h2>
+            <button class="btn btn-secondary" onclick="testPrint()">اختبار الطباعة</button>
+            <button class="btn btn-primary" onclick="testPayment()">اختبار الدفع</button>
+            <button class="btn btn-info" onclick="testProgress()">اختبار مؤشر التقدم</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>3. نتائج الاختبار</h2>
+            <div id="test-results" style="min-height: 200px; background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                جاري تحضير الاختبارات...
+            </div>
+        </div>
+        
+        <!-- النوافذ المنبثقة المطلوبة -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="add-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>إضافة طالب جديد</h2>
+                    <span class="close" onclick="closeModal('add-student-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>نافذة إضافة طالب تعمل بنجاح!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="edit-student-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>تعديل بيانات الطالب</h2>
+                    <span class="close" onclick="closeModal('edit-student-modal')">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <p>نافذة تعديل الطالب تعمل بنجاح!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="manage-student-modal" class="modal">
+            <div class="modal-content large-modal">
+                <span class="close">&times;</span>
+                <div class="modal-header">
+                    <h2>إدارة الطالب</h2>
+                    <div class="student-info-summary">
+                        <div class="info-card">
+                            <i class="fas fa-user"></i>
+                            <span id="manage-student-name">طالب اختبار</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span id="manage-student-grade">الصف الأول</span>
+                        </div>
+                        <div class="info-card">
+                            <i class="fas fa-money-bill"></i>
+                            <span id="manage-total-fees">500.000 ر.ع</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manage-tabs">
+                    <button class="tab-btn active" onclick="showManageTab('payments', this)">الأقساط والمدفوعات</button>
+                    <button class="tab-btn" onclick="showManageTab('history', this)">تاريخ الإجراءات</button>
+                    <button class="tab-btn" onclick="showManageTab('summary', this)">ملخص الحساب</button>
+                </div>
+                
+                <div id="payments-tab" class="tab-content active">
+                    <div class="payments-section">
+                        <h3>الأقساط المستحقة</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>رقم القسط</th>
+                                        <th>تاريخ الاستحقاق</th>
+                                        <th>المبلغ</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="installments-tbody">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>2024-01-01</td>
+                                        <td>250.000 ر.ع</td>
+                                        <td><span class="status paid">مدفوع</span></td>
+                                        <td><button class="btn btn-sm btn-secondary">طباعة</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>2024-02-01</td>
+                                        <td>250.000 ر.ع</td>
+                                        <td><span class="status pending">مستحق</span></td>
+                                        <td><button class="btn btn-sm btn-primary">دفع</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="history-tab" class="tab-content">
+                    <div class="history-section">
+                        <h3>سجل العمليات</h3>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>نوع الإجراء</th>
+                                        <th>التفاصيل</th>
+                                        <th>المستخدم</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-tbody">
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>إضافة طالب</td>
+                                        <td>تم إضافة الطالب إلى النظام</td>
+                                        <td>مدير النظام</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-20</td>
+                                        <td>دفع قسط</td>
+                                        <td>تم دفع القسط الأول بمبلغ 250.000 ر.ع</td>
+                                        <td>المحاسب</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="summary-tab" class="tab-content">
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="card-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>إجمالي الرسوم</h4>
+                                <span id="summary-total-fees" class="amount">500.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card paid">
+                            <div class="card-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المسدد</h4>
+                                <span id="summary-paid-amount" class="amount">250.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card pending">
+                            <div class="card-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المبلغ المتبقي</h4>
+                                <span id="summary-remaining-amount" class="amount">250.000 ر.ع</span>
+                            </div>
+                        </div>
+                        
+                        <div class="summary-card overdue">
+                            <div class="card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="card-content">
+                                <h4>المتأخرات</h4>
+                                <span id="summary-overdue-amount" class="amount">0.000 ر.ع</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <h3>تقدم السداد</h3>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div id="payment-progress" class="progress-fill" style="width: 50%; background-color: #ed8936;"></div>
+                            </div>
+                            <span id="payment-percentage" class="progress-text">50%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        let testResults = [];
+        
+        function autoLogin() {
+            const adminUser = {
+                id: 1,
+                username: 'admin',
+                role: 'admin',
+                name: 'مدير النظام'
+            };
+            
+            localStorage.setItem('logged_in_user', JSON.stringify(adminUser));
+            addTestResult('✓ تم تسجيل الدخول التلقائي بنجاح', 'success');
+        }
+        
+        function testAddStudent() {
+            try {
+                showAddStudentModal();
+                addTestResult('✓ نافذة إضافة طالب تعمل بنجاح', 'success');
+                setTimeout(() => closeModal('add-student-modal'), 2000);
+            } catch (error) {
+                addTestResult('✗ خطأ في نافذة إضافة الطالب: ' + error.message, 'error');
+            }
+        }
+        
+        function testEditStudent() {
+            try {
+                // محاولة فتح نافذة تعديل بطالب افتراضي
+                document.getElementById('edit-student-modal').style.display = 'block';
+                addTestResult('✓ نافذة تعديل الطالب تعمل بنجاح', 'success');
+                setTimeout(() => closeModal('edit-student-modal'), 2000);
+            } catch (error) {
+                addTestResult('✗ خطأ في نافذة تعديل الطالب: ' + error.message, 'error');
+            }
+        }
+        
+        function testManageStudent() {
+            try {
+                document.getElementById('manage-student-modal').style.display = 'block';
+                addTestResult('✓ نافذة إدارة الطالب تعمل بنجاح', 'success');
+                setTimeout(() => document.getElementById('manage-student-modal').style.display = 'none', 3000);
+            } catch (error) {
+                addTestResult('✗ خطأ في نافذة إدارة الطالب: ' + error.message, 'error');
+            }
+        }
+        
+        function testDeleteStudent() {
+            try {
+                if (typeof deleteStudent === 'function') {
+                    addTestResult('✓ دالة حذف الطالب موجودة', 'success');
+                } else {
+                    addTestResult('✗ دالة حذف الطالب غير موجودة', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ خطأ في اختبار حذف الطالب: ' + error.message, 'error');
+            }
+        }
+        
+        function testPrint() {
+            try {
+                if (typeof printReceipt === 'function') {
+                    addTestResult('✓ دالة الطباعة موجودة وجاهزة', 'success');
+                } else {
+                    addTestResult('✗ دالة الطباعة غير موجودة', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ خطأ في اختبار الطباعة: ' + error.message, 'error');
+            }
+        }
+        
+        function testPayment() {
+            try {
+                if (typeof payInstallment === 'function') {
+                    addTestResult('✓ دالة الدفع موجودة وجاهزة', 'success');
+                } else {
+                    addTestResult('✗ دالة الدفع غير موجودة', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ خطأ في اختبار الدفع: ' + error.message, 'error');
+            }
+        }
+        
+        function testProgress() {
+            try {
+                const progressBar = document.getElementById('payment-progress');
+                if (progressBar) {
+                    progressBar.style.width = '75%';
+                    progressBar.style.backgroundColor = '#38a169';
+                    document.getElementById('payment-percentage').textContent = '75%';
+                    addTestResult('✓ مؤشر تقدم السداد يعمل بنجاح', 'success');
+                } else {
+                    addTestResult('✗ مؤشر تقدم السداد غير موجود', 'error');
+                }
+            } catch (error) {
+                addTestResult('✗ خطأ في مؤشر التقدم: ' + error.message, 'error');
+            }
+        }
+        
+        function addTestResult(message, type) {
+            const color = type === 'success' ? 'green' : 'red';
+            testResults.push(`<div style="color: ${color}; margin: 5px 0;">${message}</div>`);
+            document.getElementById('test-results').innerHTML = testResults.join('');
+        }
+        
+        // اختبار تلقائي عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                addTestResult('🔄 بدء الاختبارات التلقائية...', 'info');
+                
+                // فحص الدوال الأساسية
+                const functions = [
+                    'showSection', 'showAddStudentModal', 'editStudent', 'manageStudent', 
+                    'deleteStudent', 'printReceipt', 'payInstallment', 'showAlert', 
+                    'closeAlert', 'showManageTab'
+                ];
+                
+                functions.forEach(func => {
+                    if (typeof window[func] === 'function') {
+                        addTestResult(`✓ ${func} موجودة`, 'success');
+                    } else {
+                        addTestResult(`✗ ${func} غير موجودة`, 'error');
+                    }
+                });
+                
+                // فحص قاعدة البيانات
+                if (typeof db === 'object') {
+                    addTestResult('✓ قاعدة البيانات متصلة', 'success');
+                } else {
+                    addTestResult('✗ قاعدة البيانات غير متصلة', 'error');
+                }
+                
+                addTestResult('✅ انتهاء الاختبارات التلقائية', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

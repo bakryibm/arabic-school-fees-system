@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار حذف المدفوعات</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div style="padding: 20px;">
+        <h1>اختبار مشكلة حذف المدفوعات</h1>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>1. إعداد البيانات التجريبية</h2>
+            <button class="btn btn-primary" onclick="setupTestData()">إعداد البيانات</button>
+            <button class="btn btn-success" onclick="createTestPayments()">إنشاء مدفوعات تجريبية</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>2. فحص المدفوعات</h2>
+            <button class="btn btn-info" onclick="listPayments()">عرض جميع المدفوعات</button>
+            <button class="btn btn-warning" onclick="testDeletePayment()">اختبار حذف مدفوعة</button>
+        </div>
+        
+        <div class="test-section" style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            <h2>3. نتائج الاختبار</h2>
+            <div id="test-results" style="min-height: 400px; background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; overflow-y: auto;">
+                انقر على "إعداد البيانات" لبدء الاختبار...
+            </div>
+        </div>
+        
+        <!-- النوافذ المنبثقة -->
+        <div id="alert-overlay" class="alert-overlay">
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <i id="alert-icon" class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <p id="alert-message"></p>
+                </div>
+                <div class="alert-actions">
+                    <button class="btn btn-primary" onclick="closeAlert()">حسناً</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        let testStudentId = null;
+        let testPayments = [];
+        
+        function setupTestData() {
+            // تسجيل دخول تلقائي
+            const adminUser = {
+                id: 1,
+                username: 'admin',
+                role: 'admin',
+                name: 'مدير النظام'
+            };
+            localStorage.setItem('logged_in_user', JSON.stringify(adminUser));
+            
+            // إنشاء طالب تجريبي
+            const studentData = {
+                academic_year: '2024-2025',
+                name: 'طالب تجريبي للمدفوعات',
+                grade: 'الصف الرابع',
+                guardian_type: 'غير موظف',
+                phone: '96891234567',
+                current_fees: 600,
+                installments_count: 3,
+                first_installment_date: '2024-01-01',
+                advance_payment: 0,
+                payment_method: 'نقداً'
+            };
+            
+            const result = db.addStudent(studentData);
+            if (result.success) {
+                testStudentId = result.student.id;
+                addLog('✓ تم إنشاء طالب تجريبي بنجاح (ID: ' + testStudentId + ')');
+                addLog('✓ تم تسجيل الدخول كمدير النظام');
+                addLog('==========================================');
+            } else {
+                addLog('✗ فشل في إنشاء الطالب التجريبي: ' + result.error);
+            }
+        }
+        
+        function createTestPayments() {
+            if (!testStudentId) {
+                addLog('✗ يجب إعداد البيانات التجريبية أولاً');
+                return;
+            }
+            
+            const paymentsToCreate = [
+                { amount: 200, notes: 'القسط الأول' },
+                { amount: 150, notes: 'القسط الثاني - جزئي' },
+                { amount: 100, notes: 'دفعة إضافية' }
+            ];
+            
+            testPayments = [];
+            addLog('بدء إنشاء المدفوعات التجريبية...');
+            
+            paymentsToCreate.forEach((payment, index) => {
+                const paymentData = {
+                    student_id: testStudentId,
+                    amount: payment.amount,
+                    payment_method: 'نقداً',
+                    payment_date: new Date().toISOString().split('T')[0],
+                    notes: payment.notes
+                };
+                
+                const result = db.addPayment(paymentData);
+                
+                if (result.success) {
+                    testPayments.push(result.payment);
+                    addLog(`✓ تم إنشاء المدفوعة ${index + 1}: ID=${result.payment.id}, مبلغ=${payment.amount}, سند=${result.payment.receipt_number}`);
+                } else {
+                    addLog(`✗ فشل في إنشاء المدفوعة ${index + 1}: ${result.error}`);
+                }
+            });
+            
+            addLog('==========================================');
+            addLog(`تم إنشاء ${testPayments.length} مدفوعة من أصل ${paymentsToCreate.length}`);
+        }
+        
+        function listPayments() {
+            if (!testStudentId) {
+                addLog('✗ يجب إعداد البيانات التجريبية أولاً');
+                return;
+            }
+            
+            addLog('جاري فحص المدفوعات في قاعدة البيانات...');
+            
+            // الحصول على المدفوعات من قاعدة البيانات
+            const allPayments = db.getPayments();
+            const studentPayments = db.getStudentPayments(testStudentId);
+            
+            addLog(`إجمالي المدفوعات في النظام: ${allPayments.length}`);
+            addLog(`مدفوعات الطالب التجريبي: ${studentPayments.length}`);
+            addLog('==========================================');
+            
+            if (studentPayments.length > 0) {
+                addLog('تفاصيل مدفوعات الطالب:');
+                studentPayments.forEach((payment, index) => {
+                    addLog(`${index + 1}. ID: ${payment.id}, مبلغ: ${payment.amount}, سند: ${payment.receipt_number}, تاريخ: ${payment.payment_date}`);
+                });
+            } else {
+                addLog('لا توجد مدفوعات للطالب التجريبي');
+            }
+            
+            addLog('==========================================');
+        }
+        
+        function testDeletePayment() {
+            if (!testStudentId) {
+                addLog('✗ يجب إعداد البيانات التجريبية أولاً');
+                return;
+            }
+            
+            const studentPayments = db.getStudentPayments(testStudentId);
+            
+            if (studentPayments.length === 0) {
+                addLog('✗ لا توجد مدفوعات للحذف. قم بإنشاء مدفوعات تجريبية أولاً');
+                return;
+            }
+            
+            const firstPayment = studentPayments[0];
+            addLog(`محاولة حذف المدفوعة الأولى: ID=${firstPayment.id}, مبلغ=${firstPayment.amount}`);
+            
+            // اختبار حذف المدفوعة
+            const result = db.deletePayment(firstPayment.id);
+            
+            if (result.success) {
+                addLog('✓ تم حذف المدفوعة بنجاح!');
+                addLog(`تفاصيل المدفوعة المحذوفة: ${JSON.stringify(result.deletedPayment, null, 2)}`);
+                
+                // فحص المدفوعات بعد الحذف
+                const paymentsAfterDelete = db.getStudentPayments(testStudentId);
+                addLog(`عدد المدفوعات بعد الحذف: ${paymentsAfterDelete.length}`);
+                
+            } else {
+                addLog(`✗ فشل في حذف المدفوعة: ${result.error}`);
+                
+                // معلومات إضافية للتشخيص
+                addLog('معلومات التشخيص:');
+                addLog(`نوع معرف المدفوعة: ${typeof firstPayment.id}`);
+                addLog(`قيمة معرف المدفوعة: ${firstPayment.id}`);
+                
+                const allPaymentIds = db.getPayments().map(p => ({ id: p.id, type: typeof p.id }));
+                addLog(`جميع معرفات المدفوعات: ${JSON.stringify(allPaymentIds, null, 2)}`);
+            }
+            
+            addLog('==========================================');
+        }
+        
+        function addLog(message) {
+            const resultsDiv = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            resultsDiv.textContent += `[${timestamp}] ${message}\n`;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        // اختبار تلقائي عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🧪 مرحباً بك في اختبار حذف المدفوعات');
+            addLog('📝 ابدأ بالنقر على "إعداد البيانات"');
+            addLog('==========================================');
+        });
+    </script>
+</body>
+</html>

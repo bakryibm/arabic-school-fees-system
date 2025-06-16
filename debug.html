@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فحص الأخطاء</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; direction: rtl; }
+        .error { color: red; background: #ffebee; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { color: green; background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .info { color: blue; background: #e3f2fd; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>فحص أخطاء JavaScript</h1>
+    <div id="results"></div>
+    
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        // فحص الأخطاء
+        window.onerror = function(msg, url, line, col, error) {
+            results.innerHTML += `<div class="error">خطأ JavaScript: ${msg} في السطر ${line}</div>`;
+            return false;
+        };
+        
+        // فحص تحميل الملفات والدوال
+        document.addEventListener('DOMContentLoaded', function() {
+            let checks = [];
+            
+            // فحص وجود الدوال الأساسية
+            if (typeof showSection === 'function') {
+                checks.push('<div class="success">✓ دالة showSection موجودة</div>');
+            } else {
+                checks.push('<div class="error">✗ دالة showSection غير موجودة</div>');
+            }
+            
+            if (typeof showAddStudentModal === 'function') {
+                checks.push('<div class="success">✓ دالة showAddStudentModal موجودة</div>');
+            } else {
+                checks.push('<div class="error">✗ دالة showAddStudentModal غير موجودة</div>');
+            }
+            
+            if (typeof editStudent === 'function') {
+                checks.push('<div class="success">✓ دالة editStudent موجودة</div>');
+            } else {
+                checks.push('<div class="error">✗ دالة editStudent غير موجودة</div>');
+            }
+            
+            if (typeof manageStudent === 'function') {
+                checks.push('<div class="success">✓ دالة manageStudent موجودة</div>');
+            } else {
+                checks.push('<div class="error">✗ دالة manageStudent غير موجودة</div>');
+            }
+            
+            // فحص قاعدة البيانات
+            if (typeof db === 'object') {
+                checks.push('<div class="success">✓ كائن قاعدة البيانات موجود</div>');
+            } else {
+                checks.push('<div class="error">✗ كائن قاعدة البيانات غير موجود</div>');
+            }
+            
+            // اختبار عملي
+            try {
+                const students = getStudents();
+                checks.push(`<div class="info">عدد الطلاب في قاعدة البيانات: ${students.length}</div>`);
+            } catch (error) {
+                checks.push(`<div class="error">خطأ في استرجاع الطلاب: ${error.message}</div>`);
+            }
+            
+            results.innerHTML += checks.join('');
+            
+            // اختبار تشغيل الدوال
+            results.innerHTML += '<div class="info">جاري اختبار الدوال...</div>';
+            
+            setTimeout(() => {
+                try {
+                    showAddStudentModal();
+                    results.innerHTML += '<div class="success">✓ تم تشغيل showAddStudentModal بنجاح</div>';
+                    closeModal('add-student-modal');
+                } catch (error) {
+                    results.innerHTML += `<div class="error">✗ خطأ في showAddStudentModal: ${error.message}</div>`;
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
